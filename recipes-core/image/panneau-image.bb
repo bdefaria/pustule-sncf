@@ -7,6 +7,10 @@ IMAGE_INSTALL = "packagegroup-core-boot \
 		 gammu-init \
 		 gammu-smsd \
 		 panneau-install \
+		 python3 \
+		 python3-importlib \
+		 python3-misc \
+		 python3-pyserial \
 		 udev-extraconf \
 		 usb-modeswitch \
 		 usbutils \

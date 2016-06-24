@@ -5,7 +5,6 @@ PR = "r0"
 S = "."
 
 DEPENDS = "linux-yocto"
-RDEPENDS_${PN} = "python3"
 
 PACKAGES = "${PN}"
 SRC_URI = "\
