@@ -4,6 +4,7 @@ IMAGE_INSTALL = "packagegroup-core-boot \
 		 ${CORE_IMAGE_EXTRA_INSTALL} \
 		 ${ROOTFS_PKGMANAGE_BOOTSTRAP} \
 		 gammu \
+		 gammu-init \
 		 gammu-smsd \
 		 panneau-install \
 		 udev-extraconf \
