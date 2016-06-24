@@ -5,6 +5,7 @@ IMAGE_INSTALL = "packagegroup-core-boot \
 		 ${ROOTFS_PKGMANAGE_BOOTSTRAP} \
 		 gammu \
 		 gammu-smsd \
+		 panneau-install \
 		 udev-extraconf \
 		 usb-modeswitch \
 		 usbutils \
