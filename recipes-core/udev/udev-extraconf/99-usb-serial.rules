@@ -1,0 +1,2 @@
+SUBSYSTEM=="tty", ATTRS{idVendor}=="05ad", ATTRS{idProduct}=="0fba", SYMLINK+="ttyPanneau"
+KERNEL=="ttyUSB[0-9]*", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="1506", SYMLINK+="ttyModem%n"
