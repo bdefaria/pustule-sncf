@@ -9,9 +9,16 @@ sms_path = "/var/spool/sms/inbox/"
 sms_raw_path = "/home/root/raw/"
 smsfiles = None
 seriallink = None
-loop_time = 20
+time_per_page = 5
+page_number = 0
+frozen = 0
 
-#Serial Commands
+# Master Finfin commands
+# #FINF00   	Reset the pannel
+# #FINF01XX 	Change display time per page in seconde (1 to 19)
+# #FINF02MSG 	Freeze the pannel with the message
+# #FINF03	Unfreeze the pannel
+
 def get_sms():
 	global smsfiles
 	smsfiles = [f for f in os.listdir(sms_path) if os.path.isfile(os.path.join(sms_path, f))]
@@ -53,23 +60,33 @@ def clean_sms():
 		os.remove(sms_path+filename)
 
 def send_reset():
+	print("Reset!!!!")
 	seriallink.write(b"\x0f\x21\x0e\x10\x03\x09")
 	time.sleep(1)
 
 def send_page(*arg):
+	page = arg[0].replace("\n","")
+	padded_page = '{s:{c}^{n}}'.format(s=page,n=150,c=' ')
 	header = b"\x02\x5c"
-	num_page = b"\x00"
-	effect = b"\x02"
-	fonte = b"\x01"
-	time_page = b"\x49"
+	num_page = b"\x30\x30"
+	effect = b"\x31"
+	fonte = b"\x31"
+	time_page = bytes([time_per_page + 48])
 	color = b"G"
-	print(arg)
-	seriallink.write(header+num_page+effect+fonte+time_page+color+b"\x3a"+str.encode(arg[0].replace("\n",""))+b"\x03")
+	print(arg[0])
+	f = open("/home/root/last",'w+')
+	f.write("x0fx21x0e")
+	seriallink.write(b"\x0f\x21\x0e")
+	f.write("x02x5cx30x30x01x01x49Gx3a"+padded_page+"x03")
+	seriallink.write(header+num_page+effect+fonte+time_page+color+b"\x3a"+str.encode(padded_page)+b"\x03")
+	f.write("x08xaaxaax09")
+	seriallink.write(b"\x08\xaa\xaa\x09")
+	f.close()
 
 def init_serial():
 	global seriallink
 	seriallink = serial.Serial(
-	port='/dev/ttyO2',
+	port='/dev/ttyPanneau',
 	baudrate=9600,
 	parity=serial.PARITY_NONE,
 	stopbits=serial.STOPBITS_ONE,
@@ -77,21 +94,54 @@ def init_serial():
 	)
 	seriallink.flushInput()
 
+def handle_cmd(*arg):
+	global time_per_page
+	global frozen
+	cmd = (arg[0].replace("#FINF",""))
+
+	if cmd.startswith("00"):
+		send_reset()
+		frozen = 0
+	elif cmd.startswith("01"):
+		if (int(cmd) - 100) < 19 and (int(cmd) - 100) > 0:
+			time_per_page = (int(cmd) - 100)
+			print("New Time per page : " + str(time_per_page))
+	elif cmd.startswith("02"):
+		frozen = 1
+		print("Freeze")
+		send_page(cmd[2:])
+	elif cmd.startswith("03"):
+		frozen = 0
+		print("Unfreeze")
+
 def handle_sms():
 	rawfiles = [f for f in os.listdir(sms_raw_path) if os.path.isfile(os.path.join(sms_raw_path, f))]
+	i = 0
+	page = [None] * 5
 	for sms in rawfiles:
 		f = open(sms_raw_path+sms)
 		for line in f:
-			send_page(line)
+			if line.startswith("#FINF"):
+				handle_cmd(line)
+			else:
+				if i < 5:
+					page[i] = line
+					i += 1
 		f.close()
 		os.remove(sms_raw_path+sms)
 
+	if frozen == 0:
+		while i > 0:
+			send_page(page[i - 1])
+			i -= 1
+		
+
 if __name__ == '__main__':
-	init_serial();
+	init_serial()
 	while 1:
 		get_sms()
 		remove_long_sms()
 		convert_sms_to_raw()
 		clean_sms()
 		handle_sms()
-		time.sleep(loop_time)
+		time.sleep(1)
