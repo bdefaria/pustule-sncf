@@ -13,16 +13,18 @@ SRC_URI = "\
 
 FILES_${PN} = "/boot/zImage \
 	       /boot/omap4-panda-es.dtb \
-	       /home/root/App.py \
-	       /home/root/raw \
-	       /var/spool/sms/inbox \
+	       /home/root \
+	       /var/spool \
 	      "
 
 do_install() {
 	install -d ${D}/var
 	install -d ${D}/var/spool
 	install -d ${D}/var/spool/sms
+	install -d ${D}/var/spool/sms/error
 	install -d ${D}/var/spool/sms/inbox
+	install -d ${D}/var/spool/sms/outbox
+	install -d ${D}/var/spool/sms/sent
 	install -d ${D}/home
 	install -d ${D}/home/root
 	install -d ${D}/home/root/raw
