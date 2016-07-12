@@ -47,7 +47,7 @@ sendtimeout = 30
 #receivefrequency = 0
 
 # Phone communication settings
-#checksecurity = 1
+checksecurity = 0
 #resetfrequency = 0
 
 # Delivery report configuration
