@@ -1,2 +1,12 @@
 SUBSYSTEM=="tty", ATTRS{idVendor}=="05ad", ATTRS{idProduct}=="0fba", SYMLINK+="ttyPanneau"
-KERNEL=="ttyUSB[0-9]*", ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="1506", SYMLINK+="ttyModem%n"
+
+ACTION!="add", GOTO="modem_rules_end"
+SUBSYSTEM!="tty" GOTO="modem_rules_end"
+ATTRS{idVendor}=="12d1", ATTRS{idProduct}=="1506", GOTO="type1_rules_begin"
+GOTO="type1_rules_end"
+LABEL="type1_rules_begin"
+
+ATTRS{port_number}=="0", SYMLINK:="ttyModem0"
+
+LABEL="type1_rules_end"
+LABEL="modem_rules_end"
