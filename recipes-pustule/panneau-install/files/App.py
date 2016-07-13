@@ -13,12 +13,14 @@ seriallink = None
 time_per_page = 5
 page_number = 0
 frozen = 0
+color = b"G"
 
 # Master Finfin commands
-# #FINF00   	Reset the pannel
-# #FINF01XX 	Change display time per page in seconde (1 to 19)
-# #FINF02MSG 	Freeze the pannel with the message
+# #FINF00	Reset the pannel
+# #FINF01XX	Change display time per page in seconde (1 to 19)
+# #FINF02MSG	Freeze the pannel with the message
 # #FINF03	Unfreeze the pannel
+# #FINF04X	Set text color G for Amber R for red
 
 def get_sms():
 	global smsfiles
@@ -71,7 +73,20 @@ def send_page(*arg):
 	wrapped_page = textwrap.fill(page, width= 20)
 	for char in wrapped_page:
 		if char is not '\n':
-			templine+=char
+			if char is 'è'or char is 'é'or char is 'ê' or char is 'ë':
+				templine+='e'
+			elif char is 'É'or char is 'È'or char is 'Ê' or char is ' Ë':
+				templine+='E'
+			elif char is 'à' or char is 'á' or char is 'â'or char is 'ä':
+				templine+='a'
+			elif char is 'Á' or char is 'À' or char is 'Â'or char is 'Ä':
+				templine+='A'
+			elif char is 'ç':
+				templine+='c'
+			elif char is 'Ç':
+				templine+='C'
+			else:
+				templine+=char
 		else:
 			padded_page+='{s:{c}^{n}}'.format(s=templine.replace('\n',''),n=20,c=' ')
 			templine=""
@@ -82,16 +97,9 @@ def send_page(*arg):
 	effect = b"\x31"
 	fonte = b"\x31"
 	time_page = bytes([time_per_page + 48])
-	color = b"G"
-	print(padded_page)
-	f = open("/home/root/last",'w+')
-	f.write("x0fx21x0e")
 	seriallink.write(b"\x0f\x21\x0e")
-	f.write("x02x5cx30x30x01x01x49Gx3a"+padded_page+"x03")
 	seriallink.write(header+num_page+effect+fonte+time_page+color+b"\x3a"+str.encode(padded_page.replace("\n"," "))+b"\x03")
-	f.write("x08xaaxaax09")
 	seriallink.write(b"\x08\xaa\xaa\x09")
-	f.close()
 
 def init_serial():
 	global seriallink
@@ -107,6 +115,7 @@ def init_serial():
 def handle_cmd(*arg):
 	global time_per_page
 	global frozen
+	global color
 	cmd = (arg[0].replace("#FINF",""))
 
 	if cmd.startswith("00"):
@@ -123,6 +132,14 @@ def handle_cmd(*arg):
 	elif cmd.startswith("03"):
 		frozen = 0
 		print("Unfreeze")
+	elif cmd.startswith("04"):
+		if cmd.replace("04","").startswith('G'):
+			color = b"G"
+			print("Set color to amber")
+		elif cmd.replace("04","").startswith('R'):
+			color = b"R"
+			print("Set color to red")
+
 
 def handle_sms():
 	rawfiles = [f for f in os.listdir(sms_raw_path) if os.path.isfile(os.path.join(sms_raw_path, f))]
@@ -144,7 +161,7 @@ def handle_sms():
 		while i > 0:
 			send_page(page[i - 1])
 			i -= 1
-		
+
 
 if __name__ == '__main__':
 	init_serial()
