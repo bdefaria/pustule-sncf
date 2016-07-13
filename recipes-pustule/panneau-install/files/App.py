@@ -3,6 +3,7 @@
 import os
 import time
 import serial
+import textwrap
 
 MAX_SMS_SIZE=140
 sms_path = "/var/spool/sms/inbox/"
@@ -26,15 +27,14 @@ def get_sms():
 def remove_long_sms():
 	global smsfiles
 	for filename in smsfiles:
-		big = 0
 		f = open(sms_path+filename)
+		length = 0
 		for lines in f:
 			if 'Length = ' in lines:
-				length = int(lines.replace("Length = ",""))
-			if '[SMSBackup001]' in lines:
-				big = 1
+				length += int(lines.replace("Length = ",""))
 		f.close()
-		if length > MAX_SMS_SIZE or big:
+		if length > MAX_SMS_SIZE:
+			print("SMS too big (" + str(length) + ")")
 			smsfiles.remove(filename)
 			os.remove(sms_path+filename)
 
@@ -66,19 +66,29 @@ def send_reset():
 
 def send_page(*arg):
 	page = arg[0].replace("\n","")
-	padded_page = '{s:{c}^{n}}'.format(s=page,n=150,c=' ')
+	templine = ""
+	padded_page = ""
+	wrapped_page = textwrap.fill(page, width= 20)
+	for char in wrapped_page:
+		if char is not '\n':
+			templine+=char
+		else:
+			padded_page+='{s:{c}^{n}}'.format(s=templine.replace('\n',''),n=20,c=' ')
+			templine=""
+	padded_page+='{s:{c}^{n}}'.format(s=templine.replace('\n',''),n=20,c=' ')
+	padded_page='{:<160}'.format(padded_page)
 	header = b"\x02\x5c"
 	num_page = b"\x30\x30"
 	effect = b"\x31"
 	fonte = b"\x31"
 	time_page = bytes([time_per_page + 48])
 	color = b"G"
-	print(arg[0])
+	print(padded_page)
 	f = open("/home/root/last",'w+')
 	f.write("x0fx21x0e")
 	seriallink.write(b"\x0f\x21\x0e")
 	f.write("x02x5cx30x30x01x01x49Gx3a"+padded_page+"x03")
-	seriallink.write(header+num_page+effect+fonte+time_page+color+b"\x3a"+str.encode(padded_page)+b"\x03")
+	seriallink.write(header+num_page+effect+fonte+time_page+color+b"\x3a"+str.encode(padded_page.replace("\n"," "))+b"\x03")
 	f.write("x08xaaxaax09")
 	seriallink.write(b"\x08\xaa\xaa\x09")
 	f.close()
