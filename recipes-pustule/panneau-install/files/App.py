@@ -22,10 +22,12 @@ color = b"G"
 # #FINF03	Unfreeze the pannel
 # #FINF04X	Set text color G for Amber R for red
 
+# get_sms Parse gammu-smsd inbox directory to get sms filenames
 def get_sms():
 	global smsfiles
 	smsfiles = [f for f in os.listdir(sms_path) if os.path.isfile(os.path.join(sms_path, f))]
 
+# remove_long_sms() Check sms length and remove too long ones
 def remove_long_sms():
 	global smsfiles
 	for filename in smsfiles:
@@ -40,6 +42,7 @@ def remove_long_sms():
 			smsfiles.remove(filename)
 			os.remove(sms_path+filename)
 
+# convert_sms_to_raw() Convert gammu-smsd files to raw text files
 def convert_sms_to_raw():
 	timestr = time.strftime("%Y%m%d%H%M%S") + "00"
 	for filename in smsfiles:
@@ -57,15 +60,18 @@ def convert_sms_to_raw():
 		fraw.close()
 		timestr = str(int(timestr) + 1)
 
+# clean_sms() Remove sms files from gammu-smsd inbox directory
 def clean_sms():
 	for filename in smsfiles:
 		os.remove(sms_path+filename)
 
+# send_reset() Send the reset command
 def send_reset():
 	print("Reset!!!!")
 	seriallink.write(b"\x0f\x21\x0e\x10\x03\x09")
-	time.sleep(1)
+	time.sleep(10)
 
+# send_page() Try to wrap the text and send it to pannel
 def send_page(*arg):
 	page = arg[0].replace("\n","")
 	templine = ""
@@ -92,6 +98,8 @@ def send_page(*arg):
 			templine=""
 	padded_page+='{s:{c}^{n}}'.format(s=templine.replace('\n',''),n=20,c=' ')
 	padded_page='{:<160}'.format(padded_page)
+	if len(padded_page > 160):
+		padded_page='{:<160}'.format(page)
 	header = b"\x02\x5c"
 	num_page = b"\x30\x30"
 	effect = b"\x31"
@@ -101,6 +109,7 @@ def send_page(*arg):
 	seriallink.write(header+num_page+effect+fonte+time_page+color+b"\x3a"+str.encode(padded_page.replace("\n"," "))+b"\x03")
 	seriallink.write(b"\x08\xaa\xaa\x09")
 
+# init_serial() Initialize the serial com to the pannel
 def init_serial():
 	global seriallink
 	seriallink = serial.Serial(
@@ -112,6 +121,7 @@ def init_serial():
 	)
 	seriallink.flushInput()
 
+# handle_cmd() Handle the #FINF master commands
 def handle_cmd(*arg):
 	global time_per_page
 	global frozen
@@ -140,7 +150,7 @@ def handle_cmd(*arg):
 			color = b"R"
 			print("Set color to red")
 
-
+# handle_sms() Handle raw sms files
 def handle_sms():
 	rawfiles = [f for f in os.listdir(sms_raw_path) if os.path.isfile(os.path.join(sms_raw_path, f))]
 	i = 0
@@ -165,6 +175,7 @@ def handle_sms():
 
 if __name__ == '__main__':
 	init_serial()
+	#Main loop
 	while 1:
 		get_sms()
 		remove_long_sms()
