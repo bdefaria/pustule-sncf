@@ -1,0 +1,2 @@
+export LANG=fr_FR.UTF-8
+/home/root/App.py &> /home/root/Applog&

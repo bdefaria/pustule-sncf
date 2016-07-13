@@ -3,6 +3,7 @@ SUMMARY = "A small image just capable of allowing a device to boot."
 IMAGE_INSTALL = "packagegroup-core-boot \
 		 ${CORE_IMAGE_EXTRA_INSTALL} \
 		 ${ROOTFS_PKGMANAGE_BOOTSTRAP} \
+		 App-init \
 		 gammu \
 		 gammu-init \
 		 gammu-smsd \

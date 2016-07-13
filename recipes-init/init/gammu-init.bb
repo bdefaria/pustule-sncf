@@ -1,5 +1,5 @@
-SUMMARY = "NW Kalea CAN configuration autostart"
-DESCRIPTION = "Autostart files for NW Kalea CAN config"
+SUMMARY = "gammu autostart"
+DESCRIPTION = "Autostart files for gammu"
 
 
 INIT_FILE = "gammu-init"
