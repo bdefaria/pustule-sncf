@@ -29,7 +29,7 @@ def get_sms():
 def remove_long_sms():
 	global smsfiles
 	for filename in smsfiles:
-		f = open(sms_path+filename)
+		f = open(sms_path+filename, "r", encoding="utf-8")
 		length = 0
 		for lines in f:
 			if 'Length = ' in lines:
@@ -43,7 +43,7 @@ def remove_long_sms():
 def convert_sms_to_raw():
 	timestr = time.strftime("%Y%m%d%H%M%S") + "00"
 	for filename in smsfiles:
-		f = open(sms_path+filename)
+		f = open(sms_path+filename, "r", encoding="utf-8")
 		next(f)
 		next(f)
 		next(f)
@@ -52,7 +52,7 @@ def convert_sms_to_raw():
 			if "; " in lines:
 				raw_str = raw_str + lines.replace("; ","").replace("\n","")
 		f.close()
-		fraw = open(sms_raw_path+timestr,'w+')
+		fraw = open(sms_raw_path+timestr,'w+', encoding="utf-8")
 		fraw.write(raw_str+"\n")
 		fraw.close()
 		timestr = str(int(timestr) + 1)
@@ -146,7 +146,7 @@ def handle_sms():
 	i = 0
 	page = [None] * 5
 	for sms in rawfiles:
-		f = open(sms_raw_path+sms)
+		f = open(sms_raw_path+sms, "r", encoding="utf-8")
 		for line in f:
 			if line.startswith("#FINF"):
 				handle_cmd(line)
