@@ -14,7 +14,7 @@
 #
 # Machine Selection
 #
-MACHINE = "pandaboard"
+MACHINE = "panda"
 
 #
 # Where to place downloads
@@ -117,7 +117,6 @@ PACKAGE_CLASSES ?= "package_rpm"
 # There are other application targets that can be used here too, see
 # meta/classes/image.bbclass and meta/classes/core-image.bbclass for more details.
 # We default to enabling the debugging tweaks.
-EXTRA_IMAGE_FEATURES = "debug-tweaks"
 
 #
 # Additional image features
@@ -215,3 +214,6 @@ PACKAGECONFIG_append_pn-nativesdk-qemu = " sdl"
 # track the version of this file when it was generated. This can safely be ignored if
 # this doesn't mean anything to you.
 CONF_VERSION = "1"
+EXTRA_IMAGEDEPENDS_remove = "u-boot"
+EXTRA_IMAGE_FEATURES = "ssh-server-dropbear"
+GLIBC_GENERATE_LOCALES = "en_GB.UTF-8 en_US.UTF-8 fr_FR.UTF-8"

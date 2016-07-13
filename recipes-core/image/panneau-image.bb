@@ -11,6 +11,7 @@ IMAGE_INSTALL = "packagegroup-core-boot \
 		 python3-importlib \
 		 python3-misc \
 		 python3-pyserial \
+		 python3-textutils \
 		 udev-extraconf \
 		 usb-modeswitch \
 		 usbutils \
@@ -24,3 +25,4 @@ IMAGE_ROOTFS_SIZE ?= "8192"
 IMAGE_ROOTFS_EXTRA_SPACE_append = "${@bb.utils.contains("DISTRO_FEATURES", "systemd", " + 4096", "" ,d)}"
 inherit extrausers
 EXTRA_USERS_PARAMS = "usermod -P nl09 root;"
+IMAGE_LINGUAS = "fr-fr"
