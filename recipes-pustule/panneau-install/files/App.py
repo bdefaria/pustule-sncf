@@ -98,8 +98,24 @@ def send_page(*arg):
 			templine=""
 	padded_page+='{s:{c}^{n}}'.format(s=templine.replace('\n',''),n=20,c=' ')
 	padded_page='{:<160}'.format(padded_page)
-	if len(padded_page > 160):
-		padded_page='{:<160}'.format(page)
+	if len(padded_page) > 160:
+		templine=""
+		for char in page:
+			if char is 'è'or char is 'é'or char is 'ê' or char is 'ë':
+				templine+='e'
+			elif char is 'É'or char is 'È'or char is 'Ê' or char is ' Ë':
+				templine+='E'
+			elif char is 'à' or char is 'á' or char is 'â'or char is 'ä':
+				templine+='a'
+			elif char is 'Á' or char is 'À' or char is 'Â'or char is 'Ä':
+				templine+='A'
+			elif char is 'ç':
+				templine+='c'
+			elif char is 'Ç':
+				templine+='C'
+			else:
+				templine+=char
+		padded_page='{:<160}'.format(templine)
 	header = b"\x02\x5c"
 	num_page = b"\x30\x30"
 	effect = b"\x31"
